@@ -10,7 +10,7 @@
                         <a type="button" class="btn btn-primary" href="/create">Agregar <i class="fa-solid fa-plus"></i></a>
                     </div>
                 </div>
-                <Table :dataDocuments="dataDocuments" @dowload="dowload" @edit="edit" @deleteDoc="deleteDoc" />
+                <Table :dataDocuments="dataDocuments" @download="download" @edit="edit" @deleteDoc="deleteDoc" />
             </div>
         </div>
     </div>
@@ -52,7 +52,15 @@ const deleteDoc = (id) => {
 const edit = (id) => {
     router.push({ name: 'edit', params: { id: id } });
 }
-
+const download = (id) => {
+    axios.get('/api/getDataDocument/' + id)
+        .then(response => {
+            window.open('/support/doc/' + response.data.pref_doc + "-" + response.data.pre_process + "-" + response.data.code + '.docx');
+        })
+        .catch(error => {
+            console.error('Error al realizar el pedido:', error);
+        });
+}
 onMounted(() => {
     getDocuments();
 });
