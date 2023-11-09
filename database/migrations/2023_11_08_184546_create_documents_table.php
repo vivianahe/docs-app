@@ -18,7 +18,6 @@ return new class extends Migration
             $table->longText('content');
             $table->unsignedBigInteger('type_document_id');
             $table->unsignedBigInteger('process_id');
-            $table->string('doc');
             $table->timestamps();
             $table->foreign('type_document_id')->references('id')->on('type_documents');
             $table->foreign('process_id')->references('id')->on('processes');

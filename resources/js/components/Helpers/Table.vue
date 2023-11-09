@@ -17,10 +17,10 @@
                     <tr v-for="(dataDoc, index) in dataDocuments" :key="dataDoc.key">
                         <td>{{ index + 1 }}</td>
                         <td>{{ dataDoc.name }}</td>
-                        <td>{{ dataDoc.code }}</td>
+                        <td>{{ dataDoc.pref_doc + '-' + dataDoc.pre_process + '-' + dataDoc.code }}</td>
                         <td>{{ dataDoc.content }}</td>
                         <td>{{ dataDoc.type_doc_name }}</td>
-                        <td>{{ dataDoc.document_na }}</td>
+                        <td>{{ dataDoc.process_name }}</td>
                         <td>
                             <button type="button" @click="$emit('editar', dataDoc.id)" class="btn btn-dark">
                                 <i class="fa-solid fa-pen-to-square mr-2"></i>

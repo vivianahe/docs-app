@@ -13,7 +13,6 @@ class Documents extends Model
         'code',
         'content',
         'type_document_id',
-        'process_id',
-        'doc',
+        'process_id'
     ];
 }

@@ -56,6 +56,13 @@ return [
             'throw' => false,
         ],
 
+        'doc' => [
+            'driver' => 'local',
+            'root' => public_path('support/doc'),
+            'url' => env('APP_URL').'/storage',
+            'visibility' => 'public',
+        ],
+
     ],
 
     /*
