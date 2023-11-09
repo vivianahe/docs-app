@@ -25,3 +25,4 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 Route::apiResource('/documents', DocumentsController::class);
 Route::apiResource('/type_documents', TypeDocumentController::class);
 Route::apiResource('/process', ProcessController::class);
+Route::get('/getDataDocument/{id}', [DocumentsController::class, 'getDataDocument']);

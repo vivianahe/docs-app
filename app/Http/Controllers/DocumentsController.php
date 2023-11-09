@@ -142,4 +142,13 @@ class DocumentsController extends Controller
         $objWriter = \PhpOffice\PhpWord\IOFactory::createWriter($phpWord, 'Word2007');
         $objWriter->save($filePath);
     }
+
+    public function getDataDocument($id)
+    {
+        $document = Documents::join('type_documents', 'type_documents.id', '=', 'documents.type_document_id')
+        ->join('processes', 'processes.id', '=', 'documents.process_id')
+        ->select('documents.code', 'type_documents.prefix as pref_doc', 'processes.prefix as pre_process')
+        ->where('documents.id', $id)->first();
+        return response()->json($document);
+    }
 }
