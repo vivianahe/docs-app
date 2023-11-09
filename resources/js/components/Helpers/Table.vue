@@ -22,11 +22,11 @@
                         <td>{{ dataDoc.type_doc_name }}</td>
                         <td>{{ dataDoc.process_name }}</td>
                         <td>
-                            <button type="button" @click="$emit('editar', dataDoc.id)" class="btn btn-dark">
+                            <button type="button" @click="$emit('edit', dataDoc.id)" class="btn btn-dark">
                                 <i class="fa-solid fa-pen-to-square mr-2"></i>
                                 Editar
                             </button>
-                            <button type="button" @click="confirmarEliminar(dataDoc.id)" class="btn btn-danger">
+                            <button type="button" @click="confirmDelete(dataDoc.id)" class="btn btn-danger">
                                 <i class="fa-solid fa-trash-can mr-2"></i>
                                 Eliminar
                             </button>
@@ -42,4 +42,21 @@
 const props = defineProps({
     dataDocuments: Array,
 });
+const emit = defineEmits(["dowload", "edit", "deteleDoc"]);
+const confirmDelete = (id) => {
+    Swal.fire({
+        title: '¿Estás Seguro?',
+        text: "No podrás revertirlo.",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Sí, bórralo!',
+        cancelButtonText: 'Cancelar'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            emit('deleteDoc', id);
+        }
+    })
+}
 </script>

@@ -8,10 +8,10 @@
                 </div>
                 <div class="row">
                     <div class="col text-center">
-                        <h3 class="card-title">Crear documento</h3>
+                        <h3 class="card-title">Editar documento</h3>
                     </div>
                 </div>
-                <form @submit.prevent="createDoc">
+                <form @submit.prevent="editDoc">
                     <div class="row g-3">
                         <div class="col">
                             <label for="name" class="form-label">Nombre:*</label>
@@ -61,20 +61,35 @@
 <script setup>
 import { onMounted, ref } from 'vue';
 import axios from 'axios';
-import { useRouter } from "vue-router";
+import { useRouter, useRoute } from "vue-router";
 const router = useRouter();
+const route = useRoute();
+const DocId = route.params.id;
+const typeDocuments = ref([]);
+const process = ref([]);
+const loader = ref(true);
 const docs = ref({
+    id: "",
     name: "",
     content: "",
     type_document: null,
     process: null
 });
-const typeDocuments = ref([]);
-const process = ref([]);
-const loader = ref(true);
 
+const getDocumentId = () => {
+    axios.get('/api/documents/' + DocId )
+        .then(response => {
+            docs.value.name = response.data.name;
+            docs.value.content = response.data.content;
+            docs.value.type_document = response.data.type_document_id;
+            docs.value.process = response.data.process_id  ;
+        })
+        .catch(error => {
+            console.error(error);
+        });
+}
 const getTypeDocuments = () => {
-    axios.get('api/type_documents')
+    axios.get('/api/type_documents')
         .then(response => {
             typeDocuments.value = response.data;
         })
@@ -83,7 +98,7 @@ const getTypeDocuments = () => {
         });
 }
 const getProcess = () => {
-    axios.get('api/process')
+    axios.get('/api/process')
         .then(response => {
             process.value = response.data;
         })
@@ -91,15 +106,14 @@ const getProcess = () => {
             console.error(error);
         });
 }
-
-const createDoc = () => {
+const editDoc = () => {
     if (docs.value.type_document !== null && docs.value.process !== null) {
         loader.value = false;
-        axios.post('api/documents', docs.value)
+        axios.put('/api/documents/'+DocId, docs.value)
             .then((response) => {
                 if (response.data === 'ok') {
                     loader.value = true;
-                    Swal.fire("Correcto!", 'Documento creado correctamente!', "success");
+                    Swal.fire("Correcto!", 'Documento guardado correctamente!', "success");
                     router.push({ path: '/' });
                 }
             })
@@ -115,11 +129,9 @@ const createDoc = () => {
         );
     }
 };
-
 onMounted(() => {
     getTypeDocuments();
     getProcess();
+    getDocumentId();
 });
-
-
 </script>

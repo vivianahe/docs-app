@@ -10,7 +10,7 @@
                         <a type="button" class="btn btn-primary" href="/create">Agregar <i class="fa-solid fa-plus"></i></a>
                     </div>
                 </div>
-                <Table :dataDocuments="dataDocuments" />
+                <Table :dataDocuments="dataDocuments" @dowload="dowload" @edit="edit" @deleteDoc="deleteDoc" />
             </div>
         </div>
     </div>
@@ -20,12 +20,13 @@
 import Table from './Helpers/Table.vue';
 import { onMounted, ref } from 'vue';
 import axios from 'axios';
+import { useRouter } from "vue-router";
 
+const router = useRouter();
 const dataDocuments = ref([]);
 
 
 const getDocuments = () => {
-
     axios.get('api/documents')
         .then(response => {
             dataDocuments.value = response.data;
@@ -33,6 +34,23 @@ const getDocuments = () => {
         .catch(error => {
             console.error('Error al realizar el pedido:', error);
         });
+}
+const deleteDoc = (id) => {
+    axios.delete('/api/documents/' + id)
+        .then((response) => {
+            if (response.data === 'ok') {
+                Swal.fire("Correcto!", 'Documento eliminado correctamente!', "success");
+                getDocuments();
+            }
+        })
+        .catch((error) => {
+            loader.value = true;
+            console.error(error);
+        });
+
+};
+const edit = (id) => {
+    router.push({ name: 'edit', params: { id: id } });
 }
 
 onMounted(() => {

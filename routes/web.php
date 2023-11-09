@@ -22,5 +22,6 @@ Route::get('/', [App\Http\Controllers\HomeController::class, 'index'])->name('ho
 
 Route::group(['middleware' => 'auth'], function () {
     Route::view('/create', 'home')->name('create');
+    Route::view('/edit/{id}', 'home')->name('edit');
 });
 

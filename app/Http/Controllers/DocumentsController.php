@@ -45,19 +45,7 @@ class DocumentsController extends Controller
             $code = $lastCode + 1;
         }
         try {
-            $type_doc = TypeDocument::where('id', $request->type_document)->select('prefix as type')->first();
-            $process = Process::where('id', $request->process)->select('prefix as proc')->first();
-
-            $phpWord = new \PhpOffice\PhpWord\PhpWord();
-            $section = $phpWord->addSection();
-            $text = $section->addText($request->content);
-            $filename = $type_doc->type . "-" . $process->proc . "-" . $code . ".docx";
-
-            $filePath = public_path('support/doc/') . $filename;
-
-            $objWriter = \PhpOffice\PhpWord\IOFactory::createWriter($phpWord, 'Word2007');
-            $objWriter->save($filePath);
-
+            $this->newDocument($request->type_document, $request->process, $request->content, $code);
             Documents::create([
                 'name' => $request->name,
                 'code' => $code,
@@ -75,11 +63,9 @@ class DocumentsController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(int $id)
     {
-        $documentId =  Documents::join('type_documents', 'type_documents.id', '=', 'documents.type_document_id')
-            ->join('processes', 'processes.id', '=', 'documents.process_id')->select('documents.*', 'type_documents.name as type_doc_name', 'documents.name as document_name')
-            ->find($id);
+        $documentId =  Documents::find($id);
         return response()->json($documentId);
     }
 
@@ -88,15 +74,41 @@ class DocumentsController extends Controller
      */
     public function edit(Documents $documents)
     {
-        //
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Documents $documents)
+    public function update(Request $request, int $id)
     {
-        //
+        $docExist = Documents::join('type_documents', 'type_documents.id', '=', 'documents.type_document_id')
+        ->join('processes', 'processes.id', '=', 'documents.process_id')
+        ->select('documents.*', 'type_documents.name as type_doc_name', 'type_documents.prefix as pref_doc', 'processes.name as process_name', 'processes.prefix as pre_process')
+        ->where('documents.id', $id)->first();
+        if ($docExist->type_document_id !== $request->type_document || $docExist->process_id !== $request->process || $docExist->content !== $request->content) {
+            $lastCode = Documents::where([
+                ['type_document_id', $request->type_document],
+                ['process_id', $request->process]
+            ])->value('code');
+
+            if (empty($lastCode)) {
+                $code = 1;
+            } else {
+                $code = $lastCode + 1;
+            }
+            unlink(public_path('support/doc/') . $docExist->pref_doc."-".$docExist->pre_process."-".$docExist->code . '.docx');
+            $this->newDocument($request->type_document, $request->process, $request->content, $code);
+        } else {
+            $code = $docExist->code;
+        }
+        Documents::where('id', $id)->update([
+            'name' => $request->name,
+            'code' => $code,
+            'content' => $request->content,
+            'type_document_id' => $request->type_document,
+            'process_id' => $request->process
+        ]);
+        return response()->json('ok');
     }
 
     /**
@@ -104,10 +116,30 @@ class DocumentsController extends Controller
      */
     public function destroy(string $id)
     {
-        $document = Documents::find($id);
+        $document = Documents::join('type_documents', 'type_documents.id', '=', 'documents.type_document_id')
+        ->join('processes', 'processes.id', '=', 'documents.process_id')
+        ->select('documents.*', 'type_documents.name as type_doc_name', 'type_documents.prefix as pref_doc', 'processes.name as process_name', 'processes.prefix as pre_process')
+        ->where('documents.id', $id)->first();
         if ($document) {
-            unlink(public_path('support/docs/') . $document->doc);
+            unlink(public_path('support/doc/') . $document->pref_doc."-".$document->pre_process."-".$document->code . '.docx');
             $document->delete();
+            return response()->json('ok');
         }
+    }
+
+    public function newDocument($type_document, $process, $content, $code)
+    {
+        $type_doc = TypeDocument::where('id', $type_document)->select('prefix as type')->first();
+        $process = Process::where('id', $process)->select('prefix as proc')->first();
+
+        $phpWord = new \PhpOffice\PhpWord\PhpWord();
+        $section = $phpWord->addSection();
+        $section->addText($content);
+        $filename = $type_doc->type . "-" . $process->proc . "-" . $code . ".docx";
+
+        $filePath = public_path('support/doc/') . $filename;
+
+        $objWriter = \PhpOffice\PhpWord\IOFactory::createWriter($phpWord, 'Word2007');
+        $objWriter->save($filePath);
     }
 }
