@@ -25,7 +25,6 @@ import { useRouter } from "vue-router";
 const router = useRouter();
 const dataDocuments = ref([]);
 
-
 const getDocuments = () => {
     axios.get('api/documents')
         .then(response => {
